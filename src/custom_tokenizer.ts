@@ -195,7 +195,7 @@ export class CustomTokenizer {
                         );
                         let split_arr = unwrappedString.split(' ');
                         split_arr.forEach(function (element, index) {
-                            if (element.startsWith("'") || element.startsWith('"')) {
+                            if (element.substring(0, 1) =="'" || element.substring(0, 1) =='"') {
                                 element = element.slice(
                                     1,
                                     element.length - 1
@@ -214,7 +214,7 @@ export class CustomTokenizer {
                         );
                         let split_arr = unwrappedTemplate.split(' ');
                         split_arr.forEach(function (element, index) {
-                            if (element.startsWith("'") || element.startsWith('"')) {
+                            if (element.substring(0, 1) =="'" || element.substring(0, 1) =='"') {
                                 element = element.slice(
                                     1,
                                     element.length - 1

@@ -7158,6 +7158,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    CustomTokenizer.prototype.errors = function () {
 	        return this.errorHandler.errors;
 	    };
+	    CustomTokenizer.prototype.addToken = function (original_token, value) {
+	        var token;
+	        token = original_token;
+	        token.value = value;
+	        this.reader.push(token);
+	        var entry = {
+	            type: token_1.TokenName[token.type],
+	            value: value
+	        };
+	        this.buffer.push(entry);
+	    };
 	    CustomTokenizer.prototype.getNextToken = function () {
 	        if (this.buffer.length === 0) {
 	            var comments = this.scanner.scanComments();
@@ -7190,41 +7201,66 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    };
 	                }
 	                var maybeRegex = (this.scanner.source[this.scanner.index] === '/') && this.reader.isRegexStart();
-	                var token = void 0;
+	                var token_2;
 	                if (maybeRegex) {
 	                    var state = this.scanner.saveState();
 	                    try {
-	                        token = this.scanner.scanRegExp();
+	                        token_2 = this.scanner.scanRegExp();
 	                    }
 	                    catch (e) {
 	                        this.scanner.restoreState(state);
-	                        token = this.scanner.lex();
+	                        token_2 = this.scanner.lex();
 	                    }
 	                }
 	                else {
-	                    token = this.scanner.lex();
+	                    token_2 = this.scanner.lex();
 	                }
-	                this.reader.push(token);
-	                var entry = {
-	                    type: token_1.TokenName[token.type],
-	                    value: this.scanner.source.slice(token.start, token.end)
-	                };
-	                if (this.trackRange) {
-	                    entry.range = [token.start, token.end];
-	                }
-	                if (this.trackLoc) {
-	                    loc.end = {
-	                        line: this.scanner.lineNumber,
-	                        column: this.scanner.index - this.scanner.lineStart
+	                if (token_2.type === 8 /* StringLiteral */ || token_2.type === 3 /* Identifier */ || token_2.type === 10 /* Template */) {
+	                    var value = String(token_2.value);
+	                    var me_1 = this;
+	                    if (token_2.type === 8 /* StringLiteral */) {
+	                        // cut single/double quotes from the string
+	                        // because esprima wraps string to a string
+	                        var unwrappedString = value.slice(1, value.length - 1);
+	                        var split_arr = unwrappedString.split(' ');
+	                        split_arr.forEach(function (element, index) {
+	                            if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
+	                                element = element.slice(1, element.length - 1);
+	                            }
+	                            me_1.addToken(token_2, element);
+	                        }, split_arr);
+	                    }
+	                    else if (token_2.type === 10 /* Template */) {
+	                        // cut backticks from the template
+	                        var len = value.length;
+	                        var isOpenedTemplate = value[0] === '`';
+	                        var isClosedTemplate = value[len - 1] === '`';
+	                        var unwrappedTemplate = value.slice(isOpenedTemplate ? 1 : 0, isClosedTemplate ? len - 1 : len);
+	                        var split_arr = unwrappedTemplate.split(' ');
+	                        split_arr.forEach(function (element, index) {
+	                            if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
+	                                element = element.slice(1, element.length - 1);
+	                            }
+	                            me_1.addToken(token_2, element);
+	                        }, split_arr);
+	                    }
+	                    this.reader.push(token_2);
+	                    var entry = {
+	                        type: token_1.TokenName[token_2.type],
+	                        value: this.scanner.source.slice(token_2.start, token_2.end)
 	                    };
-	                    entry.loc = loc;
+	                    if (this.trackRange) {
+	                        entry.range = [token_2.start, token_2.end];
+	                    }
+	                    if (this.trackLoc) {
+	                        loc.end = {
+	                            line: this.scanner.lineNumber,
+	                            column: this.scanner.index - this.scanner.lineStart
+	                        };
+	                        entry.loc = loc;
+	                    }
+	                    this.buffer.push(entry);
 	                }
-	                if (token.type === 9 /* RegularExpression */) {
-	                    var pattern = token.pattern;
-	                    var flags = token.flags;
-	                    entry.regex = { pattern: pattern, flags: flags };
-	                }
-	                this.buffer.push(entry);
 	            }
 	        }
 	        return this.buffer.shift();

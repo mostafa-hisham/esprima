@@ -1,6 +1,6 @@
-import {ErrorHandler} from './error-handler';
-import {Comment, RawToken, Scanner, SourceLocation} from './scanner';
-import {Token, TokenName} from './token';
+import { ErrorHandler } from './error-handler';
+import { Comment, RawToken, Scanner, SourceLocation } from './scanner';
+import { Token, TokenName } from './token';
 
 type ReaderEntry = string | null;
 
@@ -103,7 +103,7 @@ export class CustomTokenizer {
     scanner: Scanner;
     readonly trackRange: boolean;
     readonly trackLoc: boolean;
-    readonly buffer: BufferEntry[];
+    readonly buffer: any[];
     readonly reader: Reader;
 
     constructor(code: string, config: Config) {
@@ -172,23 +172,30 @@ export class CustomTokenizer {
                     token = this.scanner.lex();
                 }
                 this.reader.push(token);
+                const entry: BufferEntry = {
+                    type: TokenName[token.type],
+                    value: this.scanner.source.slice(token.start, token.end)
+                };
+                if (this.trackRange) {
+                    entry.range = [token.start, token.end];
+                }
+                if (this.trackLoc) {
+                    loc.end = {
+                        line: this.scanner.lineNumber,
+                        column: this.scanner.index - this.scanner.lineStart
+                    };
+                    entry.loc = loc;
+                }
+                if (token.type === Token.RegularExpression) {
+                    const pattern = token.pattern as string;
+                    const flags = token.flags as string;
+                    entry.regex = { pattern, flags };
+                }
                 if (token.value !== "" && 1 < String(token.value).length &&
                     (token.type === Token.Template || token.type === Token.StringLiteral)) {
-                    const entry: BufferEntry = {
-                        type: TokenName[token.type],
-                        value: this.scanner.source.slice(token.start, token.end)
-                    };
-                    if (this.trackRange) {
-                        entry.range = [token.start, token.end];
-                    }
-                    if (this.trackLoc) {
-                        loc.end = {
-                            line: this.scanner.lineNumber,
-                            column: this.scanner.index - this.scanner.lineStart
-                        };
-                        entry.loc = loc;
-                    }
                     this.buffer.push(entry);
+                }else{
+                    this.buffer.push([]);
                 }
             }
         }

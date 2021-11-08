@@ -7245,23 +7245,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    token = this.scanner.lex();
 	                }
 	                this.reader.push(token);
+	                var entry = {
+	                    type: token_1.TokenName[token.type],
+	                    value: this.scanner.source.slice(token.start, token.end)
+	                };
+	                if (this.trackRange) {
+	                    entry.range = [token.start, token.end];
+	                }
+	                if (this.trackLoc) {
+	                    loc.end = {
+	                        line: this.scanner.lineNumber,
+	                        column: this.scanner.index - this.scanner.lineStart
+	                    };
+	                    entry.loc = loc;
+	                }
+	                if (token.type === 9 /* RegularExpression */) {
+	                    var pattern = token.pattern;
+	                    var flags = token.flags;
+	                    entry.regex = { pattern: pattern, flags: flags };
+	                }
 	                if (token.value !== "" && 1 < String(token.value).length &&
 	                    (token.type === 10 /* Template */ || token.type === 8 /* StringLiteral */)) {
-	                    var entry = {
-	                        type: token_1.TokenName[token.type],
-	                        value: this.scanner.source.slice(token.start, token.end)
-	                    };
-	                    if (this.trackRange) {
-	                        entry.range = [token.start, token.end];
-	                    }
-	                    if (this.trackLoc) {
-	                        loc.end = {
-	                            line: this.scanner.lineNumber,
-	                            column: this.scanner.index - this.scanner.lineStart
-	                        };
-	                        entry.loc = loc;
-	                    }
 	                    this.buffer.push(entry);
+	                }
+	                else {
+	                    this.buffer.push([]);
 	                }
 	            }
 	        }

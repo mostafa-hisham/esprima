@@ -179,7 +179,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (!token) {
 	                return "break";
 	            }
-	            if (token.value == "" ||
+	            if (token.value == "" || 1 <= token.value.length ||
 	                (token.type !== 'Identifier' && token.type !== 'Template' && token.type !== 'String')) {
 	                return "continue";
 	            }
@@ -192,6 +192,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var split_arr = unwrappedString.split(' ');
 	                split_arr.forEach(function (element, index) {
 	                    if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
+	                        element = element.slice(1, element.length - 1);
+	                    }
+	                    if (element.substring(0, 1) == "." || element.substring(0, 1) == "#") {
 	                        element = element.slice(1, element.length - 1);
 	                    }
 	                    tokens.push({

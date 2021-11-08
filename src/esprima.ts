@@ -132,11 +132,12 @@ export function tokenizeC(code: string, options, delegate) {
                 break;
             }
             if (
-                token.value == "" ||
+                token.value == "" || 1<= token.value.length ||
                 (token.type !== 'Identifier' && token.type !== 'Template' && token.type !== 'String')
             ) {
                 continue;
             }
+
             const value = String(token.value);
             const type = String(token.type);
             if (token.type === 'String') {
@@ -150,6 +151,12 @@ export function tokenizeC(code: string, options, delegate) {
                 split_arr.forEach(function (element, index) {
 
                     if (element.substring(0, 1) =="'" || element.substring(0, 1) =='"') {
+                        element = element.slice(
+                            1,
+                            element.length - 1
+                        );
+                    }
+                    if (element.substring(0, 1) =="." || element.substring(0, 1) =="#") {
                         element = element.slice(
                             1,
                             element.length - 1

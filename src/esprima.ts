@@ -128,11 +128,14 @@ export function tokenizeC(code: string, options, delegate) {
     try {
         while (true) {
             let token = tokenizer.getNextToken();
+            if (!token) {
+                break;
+            }
             if (
-                !token || token.value == "" ||
+                token.value == "" ||
                 (token.type !== 'Identifier' && token.type !== 'Template' && token.type !== 'String')
             ) {
-                break;
+                continue;
             }
             const value = String(token.value);
             const type = String(token.type);
@@ -157,7 +160,7 @@ export function tokenizeC(code: string, options, delegate) {
                         'value':element
                     });
                 }, split_arr);
-                break;
+                continue;
             }else if (token.type === 'Template') {
                 // cut backticks from the template
                 const len = value.length;
@@ -180,7 +183,7 @@ export function tokenizeC(code: string, options, delegate) {
                         'value':element
                     });
                 }, split_arr);
-                break;
+                continue;
             }
             if (delegate) {
                 token = delegate(token);

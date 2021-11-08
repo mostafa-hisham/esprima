@@ -176,9 +176,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    try {
 	        var _loop_1 = function () {
 	            var token = tokenizer.getNextToken();
-	            if (!token || token.value == "" ||
-	                (token.type !== 'Identifier' && token.type !== 'Template' && token.type !== 'String')) {
+	            if (!token) {
 	                return "break";
+	            }
+	            if (token.value == "" ||
+	                (token.type !== 'Identifier' && token.type !== 'Template' && token.type !== 'String')) {
+	                return "continue";
 	            }
 	            var value = String(token.value);
 	            var type = String(token.type);
@@ -196,7 +199,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        'value': element
 	                    });
 	                }, split_arr);
-	                return "break";
+	                return "continue";
 	            }
 	            else if (token.type === 'Template') {
 	                // cut backticks from the template
@@ -214,7 +217,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        'value': element
 	                    });
 	                }, split_arr);
-	                return "break";
+	                return "continue";
 	            }
 	            if (delegate) {
 	                token = delegate(token);

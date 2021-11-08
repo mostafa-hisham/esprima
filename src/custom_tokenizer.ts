@@ -105,7 +105,7 @@ export class CustomTokenizer {
     readonly trackLoc: boolean;
     readonly buffer: BufferEntry[];
     readonly reader: Reader;
-
+    new_tokens: any = [];
     constructor(code: string, config: Config) {
         this.errorHandler = new ErrorHandler();
         this.errorHandler.tolerant = config ? (typeof config.tolerant === 'boolean' && config.tolerant) : false;
@@ -117,22 +117,15 @@ export class CustomTokenizer {
         this.trackLoc = config ? (typeof config.loc === 'boolean' && config.loc) : false;
         this.buffer = [];
         this.reader = new Reader();
+        this.new_tokens = [];
     }
 
     errors() {
         return this.errorHandler.errors;
     }
 
-    addToken(original_token, value) {
-        let token: RawToken;
-        token = original_token;
-        token.value = value;
-        this.reader.push(token);
-        const entry: BufferEntry = {
-            type: TokenName[token.type],
-            value: value
-        };
-        this.buffer.push(entry);
+    getNewTokens(){
+        return this.new_tokens;
     }
 
     getNextToken() {
@@ -186,6 +179,7 @@ export class CustomTokenizer {
                 if (token.type === Token.StringLiteral || token.type === Token.Identifier || token.type === Token.Template) {
                     const value = String(token.value);
                     const me = this;
+
                     if (token.type === Token.StringLiteral) {
                         // cut single/double quotes from the string
                         // because esprima wraps string to a string
@@ -201,7 +195,10 @@ export class CustomTokenizer {
                                     element.length - 1
                                 );
                             }
-                            me.addToken(token, element);
+                            me.new_tokens.push({
+                                'type':token.type,
+                                'value':element
+                            });
                         }, split_arr);
                     } else if (token.type === Token.Template) {
                         // cut backticks from the template
@@ -220,7 +217,10 @@ export class CustomTokenizer {
                                     element.length - 1
                                 );
                             }
-                            me.addToken(token, element);
+                            me.new_tokens.push({
+                                'type':'',
+                                'value':element
+                            });
                         }, split_arr);
                     }
                     this.reader.push(token);

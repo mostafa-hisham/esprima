@@ -173,6 +173,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function tokenizeC(code, options, delegate) {
 	    var tokenizer = new custom_tokenizer_1.CustomTokenizer(code, options);
 	    var tokens = [];
+	    tokens = tokenizer.getNewTokens().slice();
 	    try {
 	        while (true) {
 	            var token = tokenizer.getNextToken();
@@ -7146,6 +7147,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}());
 	var CustomTokenizer = /** @class */ (function () {
 	    function CustomTokenizer(code, config) {
+	        this.new_tokens = [];
 	        this.errorHandler = new error_handler_1.ErrorHandler();
 	        this.errorHandler.tolerant = config ? (typeof config.tolerant === 'boolean' && config.tolerant) : false;
 	        this.scanner = new scanner_1.Scanner(code, this.errorHandler);
@@ -7154,20 +7156,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.trackLoc = config ? (typeof config.loc === 'boolean' && config.loc) : false;
 	        this.buffer = [];
 	        this.reader = new Reader();
+	        this.new_tokens = [];
 	    }
 	    CustomTokenizer.prototype.errors = function () {
 	        return this.errorHandler.errors;
 	    };
-	    CustomTokenizer.prototype.addToken = function (original_token, value) {
-	        var token;
-	        token = original_token;
-	        token.value = value;
-	        this.reader.push(token);
-	        var entry = {
-	            type: token_1.TokenName[token.type],
-	            value: value
-	        };
-	        this.buffer.push(entry);
+	    CustomTokenizer.prototype.getNewTokens = function () {
+	        return this.new_tokens;
 	    };
 	    CustomTokenizer.prototype.getNextToken = function () {
 	        if (this.buffer.length === 0) {
@@ -7227,7 +7222,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
 	                                element = element.slice(1, element.length - 1);
 	                            }
-	                            me_1.addToken(token_2, element);
+	                            me_1.new_tokens.push({
+	                                'type': token_2.type,
+	                                'value': element
+	                            });
 	                        }, split_arr);
 	                    }
 	                    else if (token_2.type === 10 /* Template */) {
@@ -7241,7 +7239,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
 	                                element = element.slice(1, element.length - 1);
 	                            }
-	                            me_1.addToken(token_2, element);
+	                            me_1.new_tokens.push({
+	                                'type': '',
+	                                'value': element
+	                            });
 	                        }, split_arr);
 	                    }
 	                    this.reader.push(token_2);

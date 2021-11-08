@@ -122,8 +122,9 @@ export function tokenize(code: string, options, delegate) {
 export function tokenizeC(code: string, options, delegate) {
     const tokenizer = new CustomTokenizer(code, options);
 
-    const tokens: any = [];
+    let tokens: any = [];
 
+    tokens = [...tokenizer.getNewTokens()];
     try {
         while (true) {
             let token = tokenizer.getNextToken();

@@ -159,7 +159,7 @@ export function tokenizeC(code: string, options, delegate) {
                     if (element.substring(0, 1) =="." || element.substring(0, 1) =="#") {
                         element = element.slice(
                             1,
-                            element.length - 1
+                            element.length
                         );
                     }
                     tokens.push({

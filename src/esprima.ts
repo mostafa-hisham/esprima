@@ -26,6 +26,7 @@ import { CommentHandler } from './comment-handler';
 import { JSXParser } from './jsx-parser';
 import { Parser } from './parser';
 import { Tokenizer } from './tokenizer';
+import { CustomTokenizer } from './custom_tokenizer';
 
 export function parse(code: string, options, delegate) {
     let commentHandler: CommentHandler | null = null;
@@ -93,6 +94,33 @@ export function parseScript(code: string, options, delegate) {
 
 export function tokenize(code: string, options, delegate) {
     const tokenizer = new Tokenizer(code, options);
+
+    const tokens: any = [];
+
+    try {
+        while (true) {
+            let token = tokenizer.getNextToken();
+            if (!token) {
+                break;
+            }
+            if (delegate) {
+                token = delegate(token);
+            }
+            tokens.push(token);
+        }
+    } catch (e) {
+        tokenizer.errorHandler.tolerate(e);
+    }
+
+    if (tokenizer.errorHandler.tolerant) {
+        tokens.errors = tokenizer.errors();
+    }
+
+    return tokens;
+}
+
+export function tokenizeC(code: string, options, delegate) {
+    const tokenizer = new CustomTokenizer(code, options);
 
     const tokens: any = [];
 

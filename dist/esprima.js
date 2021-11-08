@@ -176,7 +176,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    try {
 	        while (true) {
 	            var token = tokenizer.getNextToken();
-	            if (!token) {
+	            if (!token || token.value == "") {
 	                break;
 	            }
 	            if (delegate) {

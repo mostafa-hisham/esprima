@@ -127,7 +127,7 @@ export function tokenizeC(code: string, options, delegate) {
     try {
         while (true) {
             let token = tokenizer.getNextToken();
-            if (!token) {
+            if (!token || token.value == "") {
                 break;
             }
             if (delegate) {

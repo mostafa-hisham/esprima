@@ -180,7 +180,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                break;
 	            }
 	            if (token.value == "" || 1 >= token.value.length ||
-	                ( /*token.type !== 'Identifier' &&*/token.type !== 'Template' && token.type !== 'String')) {
+	                (token.type !== 'Template' && token.type !== 'String')) {
 	                continue;
 	            }
 	            var value = String(token.value);
@@ -197,10 +197,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (element.substring(0, 1) == "." || element.substring(0, 1) == "#") {
 	                        element = element.slice(1, element.length);
 	                    }
-	                    /*tokens.push({
-	                        'type':type,
-	                        'value':element
-	                    });*/
 	                    tokens.push(element);
 	                }, split_arr);
 	                continue;
@@ -216,10 +212,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
 	                        element = element.slice(1, element.length - 1);
 	                    }
-	                    /*tokens.push({
-	                        'type':type,
-	                        'value':element
-	                    });*/
 	                    tokens.push(element);
 	                }, split_arr);
 	                continue;
@@ -236,7 +228,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (tokenizer.errorHandler.tolerant) {
 	        tokens.errors = tokenizer.errors();
 	    }
-	    //tokens = [...new_tokens()];
 	    return tokens;
 	}
 	exports.tokenizeC = tokenizeC;

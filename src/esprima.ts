@@ -133,7 +133,7 @@ export function tokenizeC(code: string, options, delegate) {
             }
             if (
                 token.value == "" || 1 >= token.value.length ||
-                (/*token.type !== 'Identifier' &&*/ token.type !== 'Template' && token.type !== 'String')
+                ( token.type !== 'Template' && token.type !== 'String')
             ) {
                 continue;
             }
@@ -162,10 +162,6 @@ export function tokenizeC(code: string, options, delegate) {
                             element.length
                         );
                     }
-                    /*tokens.push({
-                        'type':type,
-                        'value':element
-                    });*/
                     tokens.push(element);
                 }, split_arr);
                 continue;
@@ -186,10 +182,6 @@ export function tokenizeC(code: string, options, delegate) {
                             element.length - 1
                         );
                     }
-                    /*tokens.push({
-                        'type':type,
-                        'value':element
-                    });*/
                     tokens.push(element);
                 }, split_arr);
                 continue;
@@ -207,7 +199,6 @@ export function tokenizeC(code: string, options, delegate) {
     if (tokenizer.errorHandler.tolerant) {
         tokens.errors = tokenizer.errors();
     }
-    //tokens = [...new_tokens()];
     return tokens;
 }
 

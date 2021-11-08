@@ -132,12 +132,6 @@ export function tokenizeC(code: string, options, delegate) {
             if (!token) {
                 break;
             }
-            /*if (
-                token.value == "" || 1 >= token.value.length ||
-                ( token.type !== 'Template' && token.type !== 'String')
-            ) {
-                continue;
-            }*/
 
             const value = String(token.value);
             const type = String(token.type);

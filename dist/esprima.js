@@ -180,12 +180,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (!token) {
 	                break;
 	            }
-	            /*if (
-	                token.value == "" || 1 >= token.value.length ||
-	                ( token.type !== 'Template' && token.type !== 'String')
-	            ) {
-	                continue;
-	            }*/
 	            var value = String(token.value);
 	            var type = String(token.type);
 	            if (token.type === 'String') {

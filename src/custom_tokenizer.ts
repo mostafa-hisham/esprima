@@ -1,6 +1,6 @@
-import { ErrorHandler } from './error-handler';
-import { Comment, RawToken, Scanner, SourceLocation } from './scanner';
-import { Token, TokenName } from './token';
+import {ErrorHandler} from './error-handler';
+import {Comment, RawToken, Scanner, SourceLocation} from './scanner';
+import {Token, TokenName} from './token';
 
 type ReaderEntry = string | null;
 
@@ -123,6 +123,18 @@ export class CustomTokenizer {
         return this.errorHandler.errors;
     }
 
+    addToken(original_token, value) {
+        let token: RawToken;
+        token = original_token;
+        token.value = value;
+        this.reader.push(token);
+        const entry: BufferEntry = {
+            type: TokenName[token.type],
+            value: value
+        };
+        this.buffer.push(entry);
+    }
+
     getNextToken() {
         if (this.buffer.length === 0) {
 
@@ -171,33 +183,68 @@ export class CustomTokenizer {
                 } else {
                     token = this.scanner.lex();
                 }
-
-                this.reader.push(token);
-                const entry: BufferEntry = {
-                    type: TokenName[token.type],
-                    value: this.scanner.source.slice(token.start, token.end)
-                };
-                if (this.trackRange) {
-                    entry.range = [token.start, token.end];
-                }
-                if (this.trackLoc) {
-                    loc.end = {
-                        line: this.scanner.lineNumber,
-                        column: this.scanner.index - this.scanner.lineStart
+                if (token.type === Token.StringLiteral || token.type === Token.Identifier || token.type === Token.Template) {
+                    const value = String(token.value);
+                    const me = this;
+                    if (token.type === Token.StringLiteral) {
+                        // cut single/double quotes from the string
+                        // because esprima wraps string to a string
+                        const unwrappedString = value.slice(
+                            1,
+                            value.length - 1
+                        );
+                        let split_arr = unwrappedString.split(' ');
+                        split_arr.forEach(function (element, index) {
+                            if (element.startsWith("'") || element.startsWith('"')) {
+                                element = element.slice(
+                                    1,
+                                    element.length - 1
+                                );
+                            }
+                            me.addToken(token, element);
+                        }, split_arr);
+                    } else if (token.type === Token.Template) {
+                        // cut backticks from the template
+                        const len = value.length;
+                        const isOpenedTemplate = value[0] === '`';
+                        const isClosedTemplate = value[len - 1] === '`';
+                        const unwrappedTemplate = value.slice(
+                            isOpenedTemplate ? 1 : 0,
+                            isClosedTemplate ? len - 1 : len
+                        );
+                        let split_arr = unwrappedTemplate.split(' ');
+                        split_arr.forEach(function (element, index) {
+                            if (element.startsWith("'") || element.startsWith('"')) {
+                                element = element.slice(
+                                    1,
+                                    element.length - 1
+                                );
+                            }
+                            me.addToken(token, element);
+                        }, split_arr);
+                    }
+                    this.reader.push(token);
+                    const entry: BufferEntry = {
+                        type: TokenName[token.type],
+                        value: this.scanner.source.slice(token.start, token.end)
                     };
-                    entry.loc = loc;
+                    if (this.trackRange) {
+                        entry.range = [token.start, token.end];
+                    }
+                    if (this.trackLoc) {
+                        loc.end = {
+                            line: this.scanner.lineNumber,
+                            column: this.scanner.index - this.scanner.lineStart
+                        };
+                        entry.loc = loc;
+                    }
+                    this.buffer.push(entry);
                 }
-                if (token.type === Token.RegularExpression) {
-                    const pattern = token.pattern as string;
-                    const flags = token.flags as string;
-                    entry.regex = { pattern, flags };
-                }
-
-                this.buffer.push(entry);
             }
         }
 
         return this.buffer.shift();
     }
+
 
 }

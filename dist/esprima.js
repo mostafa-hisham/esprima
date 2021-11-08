@@ -174,14 +174,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var tokens = [];
 	    var new_tokens = [];
 	    try {
-	        var _loop_1 = function () {
+	        while (true) {
 	            var token = tokenizer.getNextToken();
 	            if (!token) {
-	                return "break";
+	                break;
 	            }
 	            if (token.value == "" || 1 >= token.value.length ||
-	                (token.type !== 'Identifier' && token.type !== 'Template' && token.type !== 'String')) {
-	                return "continue";
+	                ( /*token.type !== 'Identifier' &&*/token.type !== 'Template' && token.type !== 'String')) {
+	                continue;
 	            }
 	            var value = String(token.value);
 	            var type = String(token.type);
@@ -197,12 +197,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (element.substring(0, 1) == "." || element.substring(0, 1) == "#") {
 	                        element = element.slice(1, element.length);
 	                    }
-	                    tokens.push({
-	                        'type': type,
-	                        'value': element
-	                    });
+	                    /*tokens.push({
+	                        'type':type,
+	                        'value':element
+	                    });*/
+	                    tokens.push(element);
 	                }, split_arr);
-	                return "continue";
+	                continue;
 	            }
 	            else if (token.type === 'Template') {
 	                // cut backticks from the template
@@ -215,22 +216,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
 	                        element = element.slice(1, element.length - 1);
 	                    }
-	                    tokens.push({
-	                        'type': type,
-	                        'value': element
-	                    });
+	                    /*tokens.push({
+	                        'type':type,
+	                        'value':element
+	                    });*/
+	                    tokens.push(element);
 	                }, split_arr);
-	                return "continue";
+	                continue;
 	            }
 	            if (delegate) {
 	                token = delegate(token);
 	            }
-	            tokens.push(token);
-	        };
-	        while (true) {
-	            var state_1 = _loop_1();
-	            if (state_1 === "break")
-	                break;
+	            tokens.push(value);
 	        }
 	    }
 	    catch (e) {

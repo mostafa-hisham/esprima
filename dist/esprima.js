@@ -7244,9 +7244,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                else {
 	                    token = this.scanner.lex();
 	                }
+	                this.reader.push(token);
 	                if (token.value !== "" && 1 < String(token.value).length &&
 	                    (token.type === 10 /* Template */ || token.type === 8 /* StringLiteral */)) {
-	                    this.reader.push(token);
 	                    var entry = {
 	                        type: token_1.TokenName[token.type],
 	                        value: this.scanner.source.slice(token.start, token.end)

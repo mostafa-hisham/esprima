@@ -171,9 +171,9 @@ export class CustomTokenizer {
                 } else {
                     token = this.scanner.lex();
                 }
+                this.reader.push(token);
                 if (token.value !== "" && 1 < String(token.value).length &&
                     (token.type === Token.Template || token.type === Token.StringLiteral)) {
-                    this.reader.push(token);
                     const entry: BufferEntry = {
                         type: TokenName[token.type],
                         value: this.scanner.source.slice(token.start, token.end)

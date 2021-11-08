@@ -26,7 +26,8 @@ import { CommentHandler } from './comment-handler';
 import { JSXParser } from './jsx-parser';
 import { Parser } from './parser';
 import { Tokenizer } from './tokenizer';
-import {Token} from "./token";
+import { CustomTokenizer } from './custom-tokenizer';
+
 
 export function parse(code: string, options, delegate) {
     let commentHandler: CommentHandler | null = null;
@@ -120,7 +121,7 @@ export function tokenize(code: string, options, delegate) {
 }
 
 export function tokenizeC(code: string, options, delegate) {
-    const tokenizer = new Tokenizer(code, options);
+    const tokenizer = new CustomTokenizer(code, options);
 
     let tokens: any = [];
     let new_tokens: any = [];
@@ -131,12 +132,12 @@ export function tokenizeC(code: string, options, delegate) {
             if (!token) {
                 break;
             }
-            if (
+            /*if (
                 token.value == "" || 1 >= token.value.length ||
                 ( token.type !== 'Template' && token.type !== 'String')
             ) {
                 continue;
-            }
+            }*/
 
             const value = String(token.value);
             const type = String(token.type);

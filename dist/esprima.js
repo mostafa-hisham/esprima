@@ -86,7 +86,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var jsx_parser_1 = __webpack_require__(3);
 	var parser_1 = __webpack_require__(8);
 	var tokenizer_1 = __webpack_require__(15);
-	var custom_tokenizer_1 = __webpack_require__(16);
 	function parse(code, options, delegate) {
 	    var commentHandler = null;
 	    var proxyDelegate = function (node, metadata) {
@@ -171,18 +170,61 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.tokenize = tokenize;
 	function tokenizeC(code, options, delegate) {
-	    var tokenizer = new custom_tokenizer_1.CustomTokenizer(code, options);
+	    var tokenizer = new tokenizer_1.Tokenizer(code, options);
 	    var tokens = [];
+	    var new_tokens = [];
 	    try {
-	        while (true) {
+	        var _loop_1 = function () {
 	            var token = tokenizer.getNextToken();
-	            if (!token || token.value == "") {
-	                break;
+	            if (!token || token.value == "" ||
+	                (token.type !== 'Identifier' && token.type !== 'Template' && token.type !== 'String')) {
+	                return "break";
+	            }
+	            var value = String(token.value);
+	            var type = String(token.type);
+	            if (token.type === 'String') {
+	                // cut single/double quotes from the string
+	                // because esprima wraps string to a string
+	                var unwrappedString = value.slice(1, value.length - 1);
+	                var split_arr = unwrappedString.split(' ');
+	                split_arr.forEach(function (element, index) {
+	                    if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
+	                        element = element.slice(1, element.length - 1);
+	                    }
+	                    tokens.push({
+	                        'type': type,
+	                        'value': element
+	                    });
+	                }, split_arr);
+	                return "break";
+	            }
+	            else if (token.type === 'Template') {
+	                // cut backticks from the template
+	                var len = value.length;
+	                var isOpenedTemplate = value[0] === '`';
+	                var isClosedTemplate = value[len - 1] === '`';
+	                var unwrappedTemplate = value.slice(isOpenedTemplate ? 1 : 0, isClosedTemplate ? len - 1 : len);
+	                var split_arr = unwrappedTemplate.split(' ');
+	                split_arr.forEach(function (element, index) {
+	                    if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
+	                        element = element.slice(1, element.length - 1);
+	                    }
+	                    tokens.push({
+	                        'type': type,
+	                        'value': element
+	                    });
+	                }, split_arr);
+	                return "break";
 	            }
 	            if (delegate) {
 	                token = delegate(token);
 	            }
 	            tokens.push(token);
+	        };
+	        while (true) {
+	            var state_1 = _loop_1();
+	            if (state_1 === "break")
+	                break;
 	        }
 	    }
 	    catch (e) {
@@ -191,7 +233,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (tokenizer.errorHandler.tolerant) {
 	        tokens.errors = tokenizer.errors();
 	    }
-	    tokens = tokenizer.getNewTokens().slice();
+	    //tokens = [...new_tokens()];
 	    return tokens;
 	}
 	exports.tokenizeC = tokenizeC;
@@ -7067,208 +7109,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return Tokenizer;
 	}());
 	exports.Tokenizer = Tokenizer;
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	Object.defineProperty(exports, "__esModule", { value: true });
-	var error_handler_1 = __webpack_require__(10);
-	var scanner_1 = __webpack_require__(12);
-	var token_1 = __webpack_require__(13);
-	var Reader = /** @class */ (function () {
-	    function Reader() {
-	        this.values = [];
-	        this.curly = this.paren = -1;
-	    }
-	    // A function following one of those tokens is an expression.
-	    Reader.prototype.beforeFunctionExpression = function (t) {
-	        return ['(', '{', '[', 'in', 'typeof', 'instanceof', 'new',
-	            'return', 'case', 'delete', 'throw', 'void',
-	            // assignment operators
-	            '=', '+=', '-=', '*=', '**=', '/=', '%=', '<<=', '>>=', '>>>=',
-	            '&=', '|=', '^=', ',',
-	            // binary/unary operators
-	            '+', '-', '*', '**', '/', '%', '++', '--', '<<', '>>', '>>>', '&',
-	            '|', '^', '!', '~', '&&', '||', '??', '?', ':', '===', '==', '>=',
-	            '<=', '<', '>', '!=', '!=='].indexOf(t) >= 0;
-	    };
-	    // Determine if forward slash (/) is an operator or part of a regular expression
-	    // https://github.com/mozilla/sweet.js/wiki/design
-	    Reader.prototype.isRegexStart = function () {
-	        var previous = this.values[this.values.length - 1];
-	        var regex = (previous !== null);
-	        switch (previous) {
-	            case 'this':
-	            case ']':
-	                regex = false;
-	                break;
-	            case ')':
-	                var keyword = this.values[this.paren - 1];
-	                regex = (keyword === 'if' || keyword === 'while' || keyword === 'for' || keyword === 'with');
-	                break;
-	            case '}':
-	                // Dividing a function by anything makes little sense,
-	                // but we have to check for that.
-	                regex = true;
-	                if (this.values[this.curly - 3] === 'function') {
-	                    // Anonymous function, e.g. function(){} /42
-	                    var check = this.values[this.curly - 4];
-	                    regex = check ? !this.beforeFunctionExpression(check) : false;
-	                }
-	                else if (this.values[this.curly - 4] === 'function') {
-	                    // Named function, e.g. function f(){} /42/
-	                    var check = this.values[this.curly - 5];
-	                    regex = check ? !this.beforeFunctionExpression(check) : true;
-	                }
-	                break;
-	            default:
-	                break;
-	        }
-	        return regex;
-	    };
-	    Reader.prototype.push = function (token) {
-	        if (token.type === 7 /* Punctuator */ || token.type === 4 /* Keyword */) {
-	            if (token.value === '{') {
-	                this.curly = this.values.length;
-	            }
-	            else if (token.value === '(') {
-	                this.paren = this.values.length;
-	            }
-	            this.values.push(token.value);
-	        }
-	        else {
-	            this.values.push(null);
-	        }
-	    };
-	    return Reader;
-	}());
-	var CustomTokenizer = /** @class */ (function () {
-	    function CustomTokenizer(code, config) {
-	        this.new_tokens = [];
-	        this.errorHandler = new error_handler_1.ErrorHandler();
-	        this.errorHandler.tolerant = config ? (typeof config.tolerant === 'boolean' && config.tolerant) : false;
-	        this.scanner = new scanner_1.Scanner(code, this.errorHandler);
-	        this.scanner.trackComment = config ? (typeof config.comment === 'boolean' && config.comment) : false;
-	        this.trackRange = config ? (typeof config.range === 'boolean' && config.range) : false;
-	        this.trackLoc = config ? (typeof config.loc === 'boolean' && config.loc) : false;
-	        this.buffer = [];
-	        this.reader = new Reader();
-	        this.new_tokens = [];
-	    }
-	    CustomTokenizer.prototype.errors = function () {
-	        return this.errorHandler.errors;
-	    };
-	    CustomTokenizer.prototype.getNewTokens = function () {
-	        return this.new_tokens;
-	    };
-	    CustomTokenizer.prototype.getNextToken = function () {
-	        if (this.buffer.length === 0) {
-	            var comments = this.scanner.scanComments();
-	            if (this.scanner.trackComment) {
-	                for (var i = 0; i < comments.length; ++i) {
-	                    var e = comments[i];
-	                    var value = this.scanner.source.slice(e.slice[0], e.slice[1]);
-	                    var comment = {
-	                        type: e.multiLine ? 'BlockComment' : 'LineComment',
-	                        value: value
-	                    };
-	                    if (this.trackRange) {
-	                        comment.range = e.range;
-	                    }
-	                    if (this.trackLoc) {
-	                        comment.loc = e.loc;
-	                    }
-	                    this.buffer.push(comment);
-	                }
-	            }
-	            if (!this.scanner.eof()) {
-	                var loc = void 0;
-	                if (this.trackLoc) {
-	                    loc = {
-	                        start: {
-	                            line: this.scanner.lineNumber,
-	                            column: this.scanner.index - this.scanner.lineStart
-	                        },
-	                        end: {}
-	                    };
-	                }
-	                var maybeRegex = (this.scanner.source[this.scanner.index] === '/') && this.reader.isRegexStart();
-	                var token_2;
-	                if (maybeRegex) {
-	                    var state = this.scanner.saveState();
-	                    try {
-	                        token_2 = this.scanner.scanRegExp();
-	                    }
-	                    catch (e) {
-	                        this.scanner.restoreState(state);
-	                        token_2 = this.scanner.lex();
-	                    }
-	                }
-	                else {
-	                    token_2 = this.scanner.lex();
-	                }
-	                if (token_2.type === 8 /* StringLiteral */ || token_2.type === 3 /* Identifier */ || token_2.type === 10 /* Template */) {
-	                    var value = String(token_2.value);
-	                    var me_1 = this;
-	                    if (token_2.type === 8 /* StringLiteral */) {
-	                        // cut single/double quotes from the string
-	                        // because esprima wraps string to a string
-	                        var unwrappedString = value.slice(1, value.length - 1);
-	                        var split_arr = unwrappedString.split(' ');
-	                        split_arr.forEach(function (element, index) {
-	                            if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
-	                                element = element.slice(1, element.length - 1);
-	                            }
-	                            me_1.new_tokens.push({
-	                                'type': token_2.type,
-	                                'value': element
-	                            });
-	                        }, split_arr);
-	                    }
-	                    else if (token_2.type === 10 /* Template */) {
-	                        // cut backticks from the template
-	                        var len = value.length;
-	                        var isOpenedTemplate = value[0] === '`';
-	                        var isClosedTemplate = value[len - 1] === '`';
-	                        var unwrappedTemplate = value.slice(isOpenedTemplate ? 1 : 0, isClosedTemplate ? len - 1 : len);
-	                        var split_arr = unwrappedTemplate.split(' ');
-	                        split_arr.forEach(function (element, index) {
-	                            if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
-	                                element = element.slice(1, element.length - 1);
-	                            }
-	                            me_1.new_tokens.push({
-	                                'type': '',
-	                                'value': element
-	                            });
-	                        }, split_arr);
-	                    }
-	                    this.reader.push(token_2);
-	                    var entry = {
-	                        type: token_1.TokenName[token_2.type],
-	                        value: this.scanner.source.slice(token_2.start, token_2.end)
-	                    };
-	                    if (this.trackRange) {
-	                        entry.range = [token_2.start, token_2.end];
-	                    }
-	                    if (this.trackLoc) {
-	                        loc.end = {
-	                            line: this.scanner.lineNumber,
-	                            column: this.scanner.index - this.scanner.lineStart
-	                        };
-	                        entry.loc = loc;
-	                    }
-	                    this.buffer.push(entry);
-	                }
-	            }
-	        }
-	        return this.buffer.shift();
-	    };
-	    return CustomTokenizer;
-	}());
-	exports.CustomTokenizer = CustomTokenizer;
 
 
 /***/ }

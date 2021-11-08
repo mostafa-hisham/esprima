@@ -26,7 +26,7 @@ import { CommentHandler } from './comment-handler';
 import { JSXParser } from './jsx-parser';
 import { Parser } from './parser';
 import { Tokenizer } from './tokenizer';
-import { CustomTokenizer } from './custom_tokenizer';
+import {Token} from "./token";
 
 export function parse(code: string, options, delegate) {
     let commentHandler: CommentHandler | null = null;
@@ -120,19 +120,72 @@ export function tokenize(code: string, options, delegate) {
 }
 
 export function tokenizeC(code: string, options, delegate) {
-    const tokenizer = new CustomTokenizer(code, options);
+    const tokenizer = new Tokenizer(code, options);
 
     let tokens: any = [];
+    let new_tokens: any = [];
 
     try {
         while (true) {
             let token = tokenizer.getNextToken();
-            if (!token || token.value == "") {
+            if (
+                !token || token.value == "" ||
+                (token.type !== 'Identifier' && token.type !== 'Template' && token.type !== 'String')
+            ) {
+                break;
+            }
+            const value = String(token.value);
+            const type = String(token.type);
+            if (token.type === 'String') {
+                // cut single/double quotes from the string
+                // because esprima wraps string to a string
+                const unwrappedString = value.slice(
+                    1,
+                    value.length - 1
+                );
+                let split_arr = unwrappedString.split(' ');
+                split_arr.forEach(function (element, index) {
+
+                    if (element.substring(0, 1) =="'" || element.substring(0, 1) =='"') {
+                        element = element.slice(
+                            1,
+                            element.length - 1
+                        );
+                    }
+                    tokens.push({
+                        'type':type,
+                        'value':element
+                    });
+                }, split_arr);
+                break;
+            }else if (token.type === 'Template') {
+                // cut backticks from the template
+                const len = value.length;
+                const isOpenedTemplate = value[0] === '`';
+                const isClosedTemplate = value[len - 1] === '`';
+                const unwrappedTemplate = value.slice(
+                    isOpenedTemplate ? 1 : 0,
+                    isClosedTemplate ? len - 1 : len
+                );
+                let split_arr = unwrappedTemplate.split(' ');
+                split_arr.forEach(function (element, index) {
+                    if (element.substring(0, 1) =="'" || element.substring(0, 1) =='"') {
+                        element = element.slice(
+                            1,
+                            element.length - 1
+                        );
+                    }
+                    tokens.push({
+                        'type':type,
+                        'value':element
+                    });
+                }, split_arr);
                 break;
             }
             if (delegate) {
                 token = delegate(token);
             }
+
             tokens.push(token);
         }
     } catch (e) {
@@ -142,11 +195,11 @@ export function tokenizeC(code: string, options, delegate) {
     if (tokenizer.errorHandler.tolerant) {
         tokens.errors = tokenizer.errors();
     }
-    tokens = [...tokenizer.getNewTokens()];
+    //tokens = [...new_tokens()];
     return tokens;
 }
 
-export { Syntax } from './syntax';
+export {Syntax} from './syntax';
 
 // Sync with *.json manifests.
 export const version = '4.0.0-dev';

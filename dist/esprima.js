@@ -7263,7 +7263,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    this.buffer.push(entry);
 	                }
 	                else {
-	                    this.buffer.push([]);
+	                    this.buffer.push(entry);
 	                }
 	            }
 	        }

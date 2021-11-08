@@ -195,7 +195,7 @@ export class CustomTokenizer {
                     (token.type === Token.Template || token.type === Token.StringLiteral)) {
                     this.buffer.push(entry);
                 }else{
-                    this.buffer.push([]);
+                    this.buffer.push(entry);
                 }
             }
         }

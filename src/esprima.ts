@@ -121,7 +121,7 @@ export function tokenize(code: string, options, delegate) {
 }
 
 export function tokenizeC(code: string, options, delegate) {
-    const tokenizer = new CustomTokenizer(code, options);
+    const tokenizer = new Tokenizer(code, options);
 
     let tokens: any = [];
     let new_tokens: any = [];
@@ -131,6 +131,12 @@ export function tokenizeC(code: string, options, delegate) {
             let token = tokenizer.getNextToken();
             if (!token) {
                 break;
+            }
+            if (
+                token.value == "" || 1 >= token.value.length ||
+                ( token.type !== 'Template' && token.type !== 'String')
+            ) {
+                continue;
             }
 
             const value = String(token.value);

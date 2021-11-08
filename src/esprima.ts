@@ -156,6 +156,12 @@ export function tokenizeC(code: string, options, delegate) {
                             element.length - 1
                         );
                     }
+                    if (element.substring(0, 1) =="." || element.substring(0, 1) =="#") {
+                        element = element.slice(
+                            1,
+                            element.length
+                        );
+                    }
                     tokens.push({
                         'type':type,
                         'value':element

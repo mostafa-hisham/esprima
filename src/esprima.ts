@@ -124,7 +124,6 @@ export function tokenizeC(code: string, options, delegate) {
 
     let tokens: any = [];
 
-    tokens = [...tokenizer.getNewTokens()];
     try {
         while (true) {
             let token = tokenizer.getNextToken();
@@ -143,7 +142,7 @@ export function tokenizeC(code: string, options, delegate) {
     if (tokenizer.errorHandler.tolerant) {
         tokens.errors = tokenizer.errors();
     }
-
+    tokens = [...tokenizer.getNewTokens()];
     return tokens;
 }
 

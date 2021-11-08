@@ -173,7 +173,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	function tokenizeC(code, options, delegate) {
 	    var tokenizer = new custom_tokenizer_1.CustomTokenizer(code, options);
 	    var tokens = [];
-	    tokens = tokenizer.getNewTokens().slice();
 	    try {
 	        while (true) {
 	            var token = tokenizer.getNextToken();
@@ -192,6 +191,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (tokenizer.errorHandler.tolerant) {
 	        tokens.errors = tokenizer.errors();
 	    }
+	    tokens = tokenizer.getNewTokens().slice();
 	    return tokens;
 	}
 	exports.tokenizeC = tokenizeC;

@@ -62,7 +62,7 @@ class Reader {
 
             case ')':
                 const keyword = this.values[this.paren - 1];
-                regex = (this.values.length === this.keywordTokenClosedLoc || keyword === 'if' || keyword === 'while' || keyword === 'for' || keyword === 'with');
+                regex = ((this.values.length - 1) === this.keywordTokenClosedLoc || keyword === 'if' || keyword === 'while' || keyword === 'for' || keyword === 'with');
                 break;
 
             case '}':
@@ -94,17 +94,19 @@ class Reader {
                 this.paren = this.values.length;
                 if ((this.values.length - 1) === this.keywordTokenLoc) {
                     this.keywordTokenClosed = false;
-                }else{
+                } else {
                     this.numOpenPracket++;
                 }
-            } else if(token.value === ')'){
-                if(this.numOpenPracket ==0){
+            } else if (token.value === ')') {
+                if (this.numOpenPracket == 0) {
                     this.keywordTokenClosed = true;
                     this.keywordTokenClosedLoc = this.values.length;
+                } else {
+                    this.numOpenPracket--;
                 }
-                this.numOpenPracket--;
+
             }
-            if (token.type === Token.Keyword) {
+            if (token.type === Token.Keyword && (this.keywordTokenClosed === true || this.keywordTokenClosed === null)) {
                 this.keywordToken = token;
                 this.keywordTokenLoc = this.values.length;
             }
@@ -220,7 +222,7 @@ export class CustomTokenizer {
                     (token.type === Token.Template || token.type === Token.StringLiteral)) {
                     this.buffer.push(entry);
                 } else {
-                    this.buffer.push([]);
+                    this.buffer.push('');
                 }
             }
         }

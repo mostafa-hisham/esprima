@@ -180,8 +180,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (!token) {
 	                break;
 	            }
-	            if (token.value == "" || 1 >= token.value.length ||
-	                (token.type !== 'Template' && token.type !== 'String')) {
+	            if (token.value === "") {
 	                continue;
 	            }
 	            var value = String(token.value);
@@ -7149,7 +7148,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                break;
 	            case ')':
 	                var keyword = this.values[this.paren - 1];
-	                regex = (this.values.length === this.keywordTokenClosedLoc || keyword === 'if' || keyword === 'while' || keyword === 'for' || keyword === 'with');
+	                regex = ((this.values.length - 1) === this.keywordTokenClosedLoc || keyword === 'if' || keyword === 'while' || keyword === 'for' || keyword === 'with');
 	                break;
 	            case '}':
 	                // Dividing a function by anything makes little sense,
@@ -7190,9 +7189,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    this.keywordTokenClosed = true;
 	                    this.keywordTokenClosedLoc = this.values.length;
 	                }
-	                this.numOpenPracket--;
+	                else {
+	                    this.numOpenPracket--;
+	                }
 	            }
-	            if (token.type === 4 /* Keyword */) {
+	            if (token.type === 4 /* Keyword */ && (this.keywordTokenClosed === true || this.keywordTokenClosed === null)) {
 	                this.keywordToken = token;
 	                this.keywordTokenLoc = this.values.length;
 	            }
@@ -7289,7 +7290,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    this.buffer.push(entry);
 	                }
 	                else {
-	                    this.buffer.push([]);
+	                    this.buffer.push('');
 	                }
 	            }
 	        }

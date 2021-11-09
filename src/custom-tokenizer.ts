@@ -1,6 +1,6 @@
-import { ErrorHandler } from './error-handler';
-import { Comment, RawToken, Scanner, SourceLocation } from './scanner';
-import { Token, TokenName } from './token';
+import {ErrorHandler} from './error-handler';
+import {Comment, RawToken, Scanner, SourceLocation} from './scanner';
+import {Token, TokenName} from './token';
 
 type ReaderEntry = string | null;
 
@@ -19,10 +19,20 @@ class Reader {
     readonly values: ReaderEntry[];
     curly: number;
     paren: number;
+    numOpenPracket: number;
+    keywordToken: any;
+    keywordTokenLoc: any;
+    keywordTokenClosed: any;
+    keywordTokenClosedLoc: number;
 
     constructor() {
         this.values = [];
         this.curly = this.paren = -1;
+        this.keywordToken = null;
+        this.keywordTokenLoc = null;
+        this.keywordTokenClosed = null;
+        this.numOpenPracket = 0;
+        this.keywordTokenClosedLoc = 0;
     }
 
     // A function following one of those tokens is an expression.
@@ -52,7 +62,7 @@ class Reader {
 
             case ')':
                 const keyword = this.values[this.paren - 1];
-                regex = (keyword === 'if' || keyword === 'while' || keyword === 'for' || keyword === 'with');
+                regex = (this.values.length === this.keywordTokenClosedLoc || keyword === 'if' || keyword === 'while' || keyword === 'for' || keyword === 'with');
                 break;
 
             case '}':
@@ -82,6 +92,21 @@ class Reader {
                 this.curly = this.values.length;
             } else if (token.value === '(') {
                 this.paren = this.values.length;
+                if ((this.values.length - 1) === this.keywordTokenLoc) {
+                    this.keywordTokenClosed = false;
+                }else{
+                    this.numOpenPracket++;
+                }
+            } else if(token.value === ')'){
+                if(this.numOpenPracket ==0){
+                    this.keywordTokenClosed = true;
+                    this.keywordTokenClosedLoc = this.values.length;
+                }
+                this.numOpenPracket--;
+            }
+            if (token.type === Token.Keyword) {
+                this.keywordToken = token;
+                this.keywordTokenLoc = this.values.length;
             }
             this.values.push(token.value);
         } else {
@@ -189,13 +214,13 @@ export class CustomTokenizer {
                 if (token.type === Token.RegularExpression) {
                     const pattern = token.pattern as string;
                     const flags = token.flags as string;
-                    entry.regex = { pattern, flags };
+                    entry.regex = {pattern, flags};
                 }
                 if (token.value !== "" && 1 < String(token.value).length &&
                     (token.type === Token.Template || token.type === Token.StringLiteral)) {
                     this.buffer.push(entry);
-                }else{
-                    this.buffer.push(entry);
+                } else {
+                    this.buffer.push([]);
                 }
             }
         }

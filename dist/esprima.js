@@ -180,7 +180,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (!token) {
 	                break;
 	            }
-	            if (token.value === []) {
+	            if (token.value === [] || token.value == "" || 1 >= String(token.value).length ||
+	                (token.type !== 'Template' && token.type !== 'String')) {
 	                continue;
 	            }
 	            var value = String(token.value);

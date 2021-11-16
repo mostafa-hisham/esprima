@@ -132,8 +132,7 @@ export function tokenizeC(code: string, options, delegate) {
             if (!token) {
                 break;
             }
-            if (token.value === [] || token.value == "" || 1 >= String(token.value).length ||
-                ( token.type !== 'Template' && token.type !== 'String')) {
+            if (Object.keys(token).length === 0) {
                 continue;
             }
 

@@ -180,7 +180,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (!token) {
 	                break;
 	            }
-	            if (token.value === "") {
+	            if (token.value === []) {
 	                continue;
 	            }
 	            var value = String(token.value);
@@ -7290,7 +7290,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    this.buffer.push(entry);
 	                }
 	                else {
-	                    this.buffer.push('');
+	                    this.buffer.push([]);
 	                }
 	            }
 	        }

@@ -132,7 +132,7 @@ export function tokenizeC(code: string, options, delegate) {
             if (!token) {
                 break;
             }
-            if (token.value === "") {
+            if (token.value === []) {
                 continue;
             }
 

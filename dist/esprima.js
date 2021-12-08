@@ -173,7 +173,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function tokenizeC(code, options, delegate) {
 	    var tokenizer = new custom_tokenizer_1.CustomTokenizer(code, options);
 	    var tokens = [];
-	    var new_tokens = [];
+	    var html_tokens = [];
 	    try {
 	        while (true) {
 	            var token = tokenizer.getNextToken();
@@ -189,6 +189,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                // cut single/double quotes from the string
 	                // because esprima wraps string to a string
 	                var unwrappedString = value.slice(1, value.length - 1);
+	                if (isHTML(unwrappedString)) {
+	                    html_tokens.push(unwrappedString);
+	                    continue;
+	                }
 	                var split_arr = unwrappedString.split(' ');
 	                split_arr.forEach(function (element, index) {
 	                    if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
@@ -207,6 +211,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var isOpenedTemplate = value[0] === '`';
 	                var isClosedTemplate = value[len - 1] === '`';
 	                var unwrappedTemplate = value.slice(isOpenedTemplate ? 1 : 0, isClosedTemplate ? len - 1 : len);
+	                if (isHTML(unwrappedTemplate)) {
+	                    html_tokens.push(unwrappedTemplate);
+	                    continue;
+	                }
 	                var split_arr = unwrappedTemplate.split(' ');
 	                split_arr.forEach(function (element, index) {
 	                    if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
@@ -228,9 +236,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (tokenizer.errorHandler.tolerant) {
 	        tokens.errors = tokenizer.errors();
 	    }
-	    return tokens;
+	    return { tokens: tokens, html_tokens: html_tokens };
 	}
 	exports.tokenizeC = tokenizeC;
+	function isHTML(str) {
+	    return /<\/?[a-z][\s\S]*>/i.test(str);
+	}
 	var syntax_1 = __webpack_require__(2);
 	exports.Syntax = syntax_1.Syntax;
 	// Sync with *.json manifests.

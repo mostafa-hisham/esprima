@@ -22,11 +22,11 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-import { CommentHandler } from './comment-handler';
-import { JSXParser } from './jsx-parser';
-import { Parser } from './parser';
-import { Tokenizer } from './tokenizer';
-import { CustomTokenizer } from './custom-tokenizer';
+import {CommentHandler} from './comment-handler';
+import {JSXParser} from './jsx-parser';
+import {Parser} from './parser';
+import {Tokenizer} from './tokenizer';
+import {CustomTokenizer} from './custom-tokenizer';
 
 
 export function parse(code: string, options, delegate) {
@@ -124,7 +124,7 @@ export function tokenizeC(code: string, options, delegate) {
     const tokenizer = new CustomTokenizer(code, options);
 
     let tokens: any = [];
-    let new_tokens: any = [];
+    let html_tokens: any = [];
 
     try {
         while (true) {
@@ -145,16 +145,19 @@ export function tokenizeC(code: string, options, delegate) {
                     1,
                     value.length - 1
                 );
+                if (isHTML(unwrappedString)) {
+                    html_tokens.push(unwrappedString);
+                    continue;
+                }
                 let split_arr = unwrappedString.split(' ');
                 split_arr.forEach(function (element, index) {
-
-                    if (element.substring(0, 1) =="'" || element.substring(0, 1) =='"') {
+                    if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
                         element = element.slice(
                             1,
                             element.length - 1
                         );
                     }
-                    if (element.substring(0, 1) =="." || element.substring(0, 1) =="#") {
+                    if (element.substring(0, 1) == "." || element.substring(0, 1) == "#") {
                         element = element.slice(
                             1,
                             element.length
@@ -163,7 +166,7 @@ export function tokenizeC(code: string, options, delegate) {
                     tokens.push(element);
                 }, split_arr);
                 continue;
-            }else if (token.type === 'Template') {
+            } else if (token.type === 'Template') {
                 // cut backticks from the template
                 const len = value.length;
                 const isOpenedTemplate = value[0] === '`';
@@ -172,9 +175,13 @@ export function tokenizeC(code: string, options, delegate) {
                     isOpenedTemplate ? 1 : 0,
                     isClosedTemplate ? len - 1 : len
                 );
+                if (isHTML(unwrappedTemplate)) {
+                    html_tokens.push(unwrappedTemplate);
+                    continue;
+                }
                 let split_arr = unwrappedTemplate.split(' ');
                 split_arr.forEach(function (element, index) {
-                    if (element.substring(0, 1) =="'" || element.substring(0, 1) =='"') {
+                    if (element.substring(0, 1) == "'" || element.substring(0, 1) == '"') {
                         element = element.slice(
                             1,
                             element.length - 1
@@ -197,7 +204,11 @@ export function tokenizeC(code: string, options, delegate) {
     if (tokenizer.errorHandler.tolerant) {
         tokens.errors = tokenizer.errors();
     }
-    return tokens;
+    return {tokens,html_tokens};
+}
+
+function isHTML(str) {
+    return /<\/?[a-z][\s\S]*>/i.test(str)
 }
 
 export {Syntax} from './syntax';

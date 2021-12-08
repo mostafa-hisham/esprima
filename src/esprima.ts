@@ -139,6 +139,7 @@ export function tokenizeC(code: string, options, delegate) {
             const value = String(token.value);
             const type = String(token.type);
             if (token.type === 'String') {
+                console.log('sssss');
                 // cut single/double quotes from the string
                 // because esprima wraps string to a string
                 const unwrappedString = value.slice(

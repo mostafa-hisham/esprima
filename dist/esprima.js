@@ -186,7 +186,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var value = String(token.value);
 	            var type = String(token.type);
 	            if (token.type === 'String') {
-	                console.log('sssss');
 	                // cut single/double quotes from the string
 	                // because esprima wraps string to a string
 	                var unwrappedString = value.slice(1, value.length - 1);

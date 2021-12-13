@@ -211,7 +211,7 @@ function isHTML(str) {
     /*<script[\s\S]*?>*/
 /*    /<script[\s\S]*?>[\s\S]*?<\/script>/gi*/
     /*/\b(body|head|html)\b*/
-    return /<\/?[a-z][\s\S]*>/i.test(str) && !/<script[\s\S]*?>/i.test(str)
+    return /<\/?[a-z][\s\S]*>/i.test(str) && !/<script[\s\S]*?>/i.test(str) && !/<style[\s\S]*?>/i.test(str);
 }
 
 export {Syntax} from './syntax';

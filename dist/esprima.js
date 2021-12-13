@@ -240,7 +240,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.tokenizeC = tokenizeC;
 	function isHTML(str) {
-	    return /<\/?[a-z][\s\S]*>/i.test(str);
+	    /*<script[\s\S]*?>*/
+	    /*    /<script[\s\S]*?>[\s\S]*?<\/script>/gi*/
+	    /*/\b(body|head|html)\b*/
+	    return /<\/?[a-z][\s\S]*>/i.test(str) && !/<script[\s\S]*?>/i.test(str);
 	}
 	var syntax_1 = __webpack_require__(2);
 	exports.Syntax = syntax_1.Syntax;

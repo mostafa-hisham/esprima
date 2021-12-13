@@ -208,7 +208,10 @@ export function tokenizeC(code: string, options, delegate) {
 }
 
 function isHTML(str) {
-    return /<\/?[a-z][\s\S]*>/i.test(str)
+    /*<script[\s\S]*?>*/
+/*    /<script[\s\S]*?>[\s\S]*?<\/script>/gi*/
+    /*/\b(body|head|html)\b*/
+    return /<\/?[a-z][\s\S]*>/i.test(str) && !/<script[\s\S]*?>/i.test(str)
 }
 
 export {Syntax} from './syntax';
